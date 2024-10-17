@@ -12,4 +12,4 @@ You would need to create couple of services:
 -service that would produce dummy bills
 -service that would listen for incoming bills and send notifications to customers (notifications could be logged in the console in the following format: "Received a bill for subscription={subscription} from provider={provider} for {sum} {currency}. Sending {notification type} to {contact info}")
 
-![Uploading Diagram.png…]()
+<img width="1236" alt="Diagram" src="https://github.com/user-attachments/assets/10f71e0f-454a-4a60-88b2-23756c58e0cb">
