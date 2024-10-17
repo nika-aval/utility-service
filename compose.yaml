@@ -1,0 +1,17 @@
+services:
+  db:
+    container_name: utility_service_db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: myusername
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5433:5432"
+
+  redis:
+    container_name: redis_cache
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    restart: always
