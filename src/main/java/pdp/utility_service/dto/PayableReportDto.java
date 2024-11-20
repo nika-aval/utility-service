@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -13,6 +12,6 @@ import java.util.Map;
 public class PayableReportDto implements Serializable {
     private Long customerId;
     private BigDecimal totalPayableAmount;
-    private Map<String, BigDecimal> payableAmounts = new HashMap<>();
-    private Map<String, Long[]> payableBillIds = new HashMap<>();
+    private Map<String, BigDecimal> payableAmounts;
+    private Map<String, Long[]> payableBillIds;
 }

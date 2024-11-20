@@ -1,6 +1,16 @@
 package pdp.utility_service.dto;
 
+import lombok.*;
+
 import java.io.Serializable;
 
-public record CustomerDto(Long id, String firstName, String lastName, String email, String phone) implements Serializable {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CustomerDto implements Serializable {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
 }

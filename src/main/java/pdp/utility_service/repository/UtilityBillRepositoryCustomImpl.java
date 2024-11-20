@@ -1,6 +1,8 @@
 package pdp.utility_service.repository;
 
-import org.jooq.*;
+import org.jooq.DSLContext;
+import org.jooq.Record3;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import pdp.utility_service.dto.PayableReportDto;
 
@@ -9,8 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.jooq.impl.DSL.*;
+import static pdp.utility_service.model.Tables.SUBSCRIPTION_PROVIDER;
+import static pdp.utility_service.model.Tables.UTILITY_BILL;
 
 public class UtilityBillRepositoryCustomImpl implements UtilityBillRepositoryCustom {
+
+    public static String PAYABLE_AMOUNT = "payable_amount";
+    public static String BILL_IDS = "bill_ids";
 
     @Autowired
     private DSLContext dslContext;
@@ -26,9 +33,9 @@ public class UtilityBillRepositoryCustomImpl implements UtilityBillRepositoryCus
         Map<String, Long[]> payableBills = new HashMap<>();
 
         for (Record3<String, Long[], BigDecimal> record : result) {
-            payableAmounts.put(record.getValue("name", String.class), record.getValue("payable_amount", BigDecimal.class));
-            payableBills.put(record.getValue("name", String.class), record.getValue("bill_ids", Long[].class));
-            totalPayableAmount = totalPayableAmount.add(record.getValue("payable_amount", BigDecimal.class));
+            payableAmounts.put(record.get(SUBSCRIPTION_PROVIDER.NAME), record.getValue(PAYABLE_AMOUNT, BigDecimal.class));
+            payableBills.put(record.get(SUBSCRIPTION_PROVIDER.NAME), record.getValue(BILL_IDS, Long[].class));
+            totalPayableAmount = totalPayableAmount.add(record.getValue(PAYABLE_AMOUNT, BigDecimal.class));
         }
 
         return PayableReportDto.builder()
@@ -41,20 +48,17 @@ public class UtilityBillRepositoryCustomImpl implements UtilityBillRepositoryCus
 
     private Result<Record3<String, Long[], BigDecimal>> executeQuery(Long customerId) {
         return dslContext.
-                select(field(name("subscription_provider", "name"), String.class),
-                        arrayAgg(field(name("utility_bill", "id"), Long.class)).as(unquotedName("bill_ids")),
-                        sum(field(unquotedName("amount"), BigDecimal.class)).as(unquotedName("payable_amount"))
+                select(SUBSCRIPTION_PROVIDER.NAME,
+                        arrayAgg(UTILITY_BILL.ID).as(unquotedName(BILL_IDS)),
+                        sum(UTILITY_BILL.AMOUNT).as(unquotedName(PAYABLE_AMOUNT))
                 )
-                .from(table(unquotedName("utility_bill"))
-                        .join(table(unquotedName("subscription_provider")))
-                        .on(field(name("utility_bill", "subscription_provider_id")).eq(field(name("subscription_provider", "id"))))
-                )
-                .where(
-                        field(unquotedName("customer_id"), Long.class).eq(inline(customerId))
-                                .and(field(unquotedName("is_paid"), Boolean.class).eq(inline(false)))
-                )
-                .groupBy(field(unquotedName("subscription_provider_id")), field(name("subscription_provider", "name")))
-                .orderBy(field(unquotedName("payable_amount")).asc())
+                .from(UTILITY_BILL)
+                .join(SUBSCRIPTION_PROVIDER)
+                        .on(UTILITY_BILL.SUBSCRIPTION_PROVIDER_ID.eq(SUBSCRIPTION_PROVIDER.ID))
+                .where(UTILITY_BILL.CUSTOMER_ID.eq(inline(customerId))
+                        .and(UTILITY_BILL.IS_PAID.isFalse()))
+                .groupBy(SUBSCRIPTION_PROVIDER.ID, SUBSCRIPTION_PROVIDER.NAME)
+                .orderBy(field(unquotedName(PAYABLE_AMOUNT)).asc())
                 .fetch();
     }
 

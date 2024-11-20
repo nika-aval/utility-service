@@ -19,19 +19,19 @@ public class SubscriptionProviderController {
 
     private final SubscriptionProviderService subscriptionProviderService;
 
-    @PostMapping("/create")
+    @PostMapping
     @Operation(summary = "Create a new subscription provider", description = "Creates a new subscription provider with the provided details")
     public SubscriptionProviderDto createSubscriptionProvider(@RequestBody @Parameter(description = "Subscription provider details") SubscriptionProviderDto subscriptionProviderDto) {
         return subscriptionProviderService.createSubscriptionProvider(subscriptionProviderDto);
     }
 
-    @GetMapping("/all-providers")
+    @GetMapping
     @Operation(summary = "Get all subscription providers", description = "Retrieves a list of all available subscription providers")
     public List<SubscriptionProviderDto> getAllSubscriptionProviders() {
         return subscriptionProviderService.findAllSubscriptionProviders();
     }
 
-    @GetMapping("/all-providers/{subscriptionProviderId}")
+    @GetMapping("/{subscriptionProviderId}")
     @Operation(summary = "Get all customers by subscription provider ID", description = "Retrieves a list of customers associated with a specified subscription provider")
     public List<CustomerDto> getAllByCustomerId(@PathVariable @Parameter(description = "Subscription Provider ID") Long subscriptionProviderId) {
         return subscriptionProviderService.findAllCustomersById(subscriptionProviderId);
