@@ -1,6 +1,6 @@
 package pdp.utility_service.service;
 
-import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,8 @@ import pdp.utility_service.repository.CustomerRepository;
 import pdp.utility_service.repository.CustomerRepositoryCustomImpl;
 import pdp.utility_service.repository.SubscriptionProviderRepository;
 
-import static pdp.utility_service.mapper.CustomerMapper.toEntity;
-
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class SubscriptionConsumerService {
 
     public static final String SUBSCRIBE_UTILITY = "subscribe_utility";
@@ -28,11 +25,21 @@ public class SubscriptionConsumerService {
     private final CustomerRepository customerRepository;
     private final CustomerRepositoryCustomImpl customerRepositoryCustomImpl;
     private final SubscriptionProviderRepository subscriptionProviderRepository;
+    private final ModelMapper mapper;
+
+    public SubscriptionConsumerService(CustomerRepository customerRepository,
+                                       CustomerRepositoryCustomImpl customerRepositoryCustomImpl,
+                                       SubscriptionProviderRepository subscriptionProviderRepository) {
+        this.customerRepository = customerRepository;
+        this.customerRepositoryCustomImpl = customerRepositoryCustomImpl;
+        this.subscriptionProviderRepository = subscriptionProviderRepository;
+        mapper = new ModelMapper();
+    }
 
     @KafkaListener(topics = SUBSCRIBE_UTILITY, groupId = SUBSCRIBE_UTILITY_GROUP)
     public void subscribeUtility(Message<SubscriptionDto> subscriptionDto) {
         Long subscriptionProviderId = subscriptionDto.getPayload().subscriptionProviderId();
-        Customer customer = toEntity(subscriptionDto.getPayload().customerDto());
+        Customer customer = mapper.map(subscriptionDto.getPayload().customerDto(), Customer.class);
 
         SubscriptionProvider subscriptionProvider = subscriptionProviderRepository.findById(subscriptionProviderId)
                 .orElseThrow(() -> new RuntimeException("Subscription provider with id " + subscriptionProviderId + " not found"));
@@ -48,7 +55,7 @@ public class SubscriptionConsumerService {
     @KafkaListener(topics = CANCEL_SUBSCRIPTION, groupId = CANCEL_SUBSCRIPTION_GROUP)
     public void cancelSubscription(Message<SubscriptionDto> subscriptionDto) {
         Long subscriptionProviderId = subscriptionDto.getPayload().subscriptionProviderId();
-        Long customerId = subscriptionDto.getPayload().customerDto().id();
+        Long customerId = subscriptionDto.getPayload().customerDto().getId();
 
         customerRepositoryCustomImpl.cancelSubscription(subscriptionProviderId, customerId);
     }

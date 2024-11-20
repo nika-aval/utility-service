@@ -1,6 +1,19 @@
 package pdp.utility_service.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Set;
 
-public record CustomerDetailsDto(Long id, String firstName, String lastName, String email, String phone, Set<BankAccount> bankAccounts) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CustomerDetailsDto {
+    private Long id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private Set<BankAccount> bankAccounts;
 }

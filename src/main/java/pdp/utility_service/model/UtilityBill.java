@@ -17,12 +17,10 @@ public class UtilityBill {
     private LocalDateTime date = LocalDateTime.now();
     private BigDecimal amount;
     private boolean isPaid = false;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn
     private SubscriptionProvider subscriptionProvider;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn
     private Customer customer;
 }

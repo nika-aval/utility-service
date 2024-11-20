@@ -3,12 +3,14 @@ package pdp.utility_service.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jooq.JooqAutoConfiguration;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import pdp.utility_service.dto.CustomerDto;
 import pdp.utility_service.dto.SubscriptionProviderDto;
 import pdp.utility_service.model.Customer;
@@ -21,24 +23,25 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static pdp.utility_service.mapper.SubscriptionProviderMapper.toEntity;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
+@SpringBootTest
+@ActiveProfiles("test")
 @ImportAutoConfiguration(JooqAutoConfiguration.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class SubscriptionProviderServiceIT {
 
     @Autowired
     private SubscriptionProviderRepository subscriptionProviderRepository;
     @Autowired
     private CustomerRepository customerRepository;
-
+    @Autowired
     private SubscriptionProviderService subscriptionProviderService;
+
+    private final ModelMapper mapper = new ModelMapper();
 
     @BeforeEach
     @AfterEach
     void setUp() {
-        subscriptionProviderService = new SubscriptionProviderService(subscriptionProviderRepository, customerRepository);
         subscriptionProviderRepository.deleteAll();
         customerRepository.deleteAll();
     }
@@ -75,11 +78,12 @@ class SubscriptionProviderServiceIT {
     }
 
     @Test
+    @Transactional
     void shouldFindAllCustomersById() {
         // GIVEN
         Customer customer = customerRepository.saveAndFlush(generateCustomer());
 
-        SubscriptionProvider subscriptionProvider = toEntity(generateSubscriptionProviderDto());
+        SubscriptionProvider subscriptionProvider = mapper.map(generateSubscriptionProviderDto(), SubscriptionProvider.class);
         subscriptionProvider.getCustomers().add(customer);
         Long subscriptionProviderId = subscriptionProviderRepository.saveAndFlush(subscriptionProvider).getId();
 
