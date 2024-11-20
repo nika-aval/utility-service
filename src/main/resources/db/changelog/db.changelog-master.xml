@@ -6,4 +6,5 @@
 
     <include file="2024-10-02-create-initial-tables.sql" relativeToChangelogFile="true"/>
     <include file="2024-10-10-create-utility-bill-table.sql" relativeToChangelogFile="true"/>
+    <include file="2024-11-20-create-outbox-event-table.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
