@@ -37,7 +37,8 @@ public class UtilityBillController {
     @Operation(summary = "Check utility balance by customer ID", description = "Retrieves a payable report for a specified customer")
     public ResponseEntity<PayableReportDto> checkUtilityBalanceByCustomerId(@PathVariable @Parameter(description = "customer ID") Long customerId) {
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(6, TimeUnit.MINUTES))
+                .cacheControl(CacheControl
+                        .maxAge(6, TimeUnit.MINUTES))
                 .body(utilityBillService.checkUtilityBalanceByCustomerId(customerId));
     }
 

@@ -2,7 +2,6 @@ package pdp.utility_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import pdp.utility_service.dto.BankAccountDto;
 import pdp.utility_service.model.UtilityBill;
 import pdp.utility_service.repository.UtilityBillRepository;
@@ -17,12 +16,11 @@ public class UtilityBillPaymentService {
     private final CustomerServiceClient customerServiceClient;
     private final UtilityBillRepository utilityBillRepository;
 
-    @Transactional
     public BankAccountDto payBills(Long customerId, String iban, List<Long> billIds) {
         List<BankAccountDto> bankAccounts = customerServiceClient.getBankAccountsByCustomerId(customerId);
 
         BigDecimal totalPayableAmount = BigDecimal.ZERO;
-        List<UtilityBill> allById = utilityBillRepository.findAllById(billIds);
+        List<UtilityBill> allById = utilityBillRepository.findAllByIdInAndIsPaid(billIds, false);
 
         for (UtilityBill utilityBill : allById) {
             totalPayableAmount = totalPayableAmount.add(utilityBill.getAmount());
@@ -37,6 +35,8 @@ public class UtilityBillPaymentService {
         }
 
         allById.forEach(utilityBill -> utilityBill.setPaid(true));
+        utilityBillRepository.saveAll(allById);
+
         return customerServiceClient.deductPaymentFromBalance(iban, totalPayableAmount);
     }
 
